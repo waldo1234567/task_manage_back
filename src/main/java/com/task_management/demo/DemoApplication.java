@@ -11,6 +11,7 @@ public class DemoApplication {
 		Dotenv dotenv =Dotenv.configure().directory("src/main/resources").ignoreIfMissing().load();
 		System.setProperty("DB_PASSWORD", System.getenv("DB_PASSWORD") != null ? System.getenv("DB_PASSWORD") : dotenv.get("DB_PASSWORD"));
 		System.setProperty("CLIENT_SECRET", System.getenv("CLIENT_SECRET") != null ? System.getenv("CLIENT_SECRET") : dotenv.get("CLIENT_SECRET"));
+		System.setProperty("OAUTH_ISSUER", System.getenv("OAUTH_ISSUER") != null ? System.getenv("OAUTH_ISSUER") : dotenv.get("OAUTH_ISSUER"));
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
