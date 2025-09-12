@@ -31,6 +31,7 @@ public class TaskController {
             @Valid @RequestBody CreateTaskRequest req
             ){
         String actorSub = jwt != null ? jwt.getSubject() : null;
+        System.out.println("---------->actor sub " + actorSub);
         return taskService.createTask(req, actorSub);
     }
 
@@ -41,7 +42,7 @@ public class TaskController {
     }
 
     //list by project
-    @GetMapping("/projects/{projectId}")
+    @GetMapping("/tasks-by-project/{projectId}")
     public List<TaskResponse> getTaskByProjects(@PathVariable("projectId") UUID projectId){
         return taskService.findTaskByProject(projectId);
     }
@@ -55,5 +56,23 @@ public class TaskController {
         String actorSub = jwt != null ? jwt.getSubject(): null;
         return taskService.updateTask(taskId, req,actorSub);
     }
+
+    @PostMapping("/tasks/{taskId}/move")
+    public TaskResponse moveTask(@AuthenticationPrincipal Jwt jwt,
+                                 @PathVariable("taskId") UUID taskId,
+                                 @RequestBody MoveTaskRequest req) {
+        String actorSub = jwt != null ? jwt.getSubject() : null;
+        return taskService.moveTask(taskId, req.getToColumnId(), req.getNewPosition(), actorSub);
+    }
+
+    public static class MoveTaskRequest {
+        private UUID toColumnId;
+        private Double newPosition;
+        public UUID getToColumnId() { return toColumnId; }
+        public void setToColumnId(UUID toColumnId) { this.toColumnId = toColumnId; }
+        public Double getNewPosition() { return newPosition; }
+        public void setNewPosition(Double newPosition) { this.newPosition = newPosition; }
+    }
+
 
 }

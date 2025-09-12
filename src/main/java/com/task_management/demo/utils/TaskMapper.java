@@ -1,6 +1,8 @@
 package com.task_management.demo.utils;
 
+import com.task_management.demo.dto.ProjectResponse;
 import com.task_management.demo.dto.TaskResponse;
+import com.task_management.demo.entity.ProjectEntity;
 import com.task_management.demo.entity.TaskEntity;
 
 public final class TaskMapper {

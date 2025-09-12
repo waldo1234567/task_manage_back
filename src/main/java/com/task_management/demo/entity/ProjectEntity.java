@@ -19,6 +19,9 @@ public class ProjectEntity {
     @Column(columnDefinition = "text")
     private String description;
 
+    @Column(name = "created_by_auth0_id", length = 128)
+    private String createdByAuth0Id;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
@@ -37,5 +40,7 @@ public class ProjectEntity {
     public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public String getCreatedByAuth0Id() { return createdByAuth0Id; }
+    public void setCreatedByAuth0Id(String createdByAuth0Id) { this.createdByAuth0Id = createdByAuth0Id; }
     public Instant getCreatedAt() { return createdAt; }
 }

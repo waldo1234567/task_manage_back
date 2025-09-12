@@ -1,8 +1,7 @@
 package com.task_management.demo.dto;
 
-import org.hibernate.validator.constraints.UUID;
-
 import java.time.Instant;
+import java.util.UUID;
 
 public class ActivityLogResponse {
     private UUID id;

@@ -4,9 +4,11 @@ import com.task_management.demo.dto.CreateTaskRequest;
 import com.task_management.demo.dto.TaskResponse;
 import com.task_management.demo.dto.UpdateTaskRequest;
 import com.task_management.demo.entity.ActivityLogEntity;
+import com.task_management.demo.entity.BoardColumnEntity;
 import com.task_management.demo.entity.ProjectEntity;
 import com.task_management.demo.entity.TaskEntity;
 import com.task_management.demo.repository.ActivityLogRepository;
+import com.task_management.demo.repository.BoardColumnRepository;
 import com.task_management.demo.repository.ProjectRepository;
 import com.task_management.demo.repository.TaskRepository;
 import com.task_management.demo.utils.TaskMapper;
@@ -30,17 +32,20 @@ public class TaskService {
     private final ActivityLogRepository activityLogRepository;
 
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final BoardColumnRepository boardColumnRepository;
 
     public TaskService(
             TaskRepository taskRepository,
             ProjectRepository projectRepository,
             ActivityLogRepository activityLogRepository,
-            SimpMessagingTemplate simpMessagingTemplate
+            SimpMessagingTemplate simpMessagingTemplate,
+            BoardColumnRepository boardColumnRepository
     ){
         this.taskRepository=taskRepository;
         this.projectRepository=projectRepository;
         this.activityLogRepository=activityLogRepository;
         this.simpMessagingTemplate=simpMessagingTemplate;
+        this.boardColumnRepository=boardColumnRepository;
     }
 
 
@@ -141,6 +146,54 @@ public class TaskService {
                 simpMessagingTemplate.convertAndSend(topic, payload);
             }
         }
+        return TaskMapper.toDto(saved);
+    }
+
+    @Transactional
+    public TaskResponse moveTask(UUID taskId, UUID toColumnId, Double newPosition, String actorAuth0Id){
+        TaskEntity t = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "task not found"));
+
+        BoardColumnEntity newCol = null;
+        if(toColumnId != null){
+            newCol = boardColumnRepository.findById(toColumnId)
+                    .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Column not found"));
+        }
+        Double pos = newPosition;
+        if(pos == null){
+            if(newCol != null){
+                Double maxPos =  taskRepository.findMaxPositionInColumn(newCol.getId());
+                pos = (maxPos == null) ? 1000.0 : (maxPos + 1000.0);
+            }else{
+                Double maxPos = taskRepository.findMaxPositionInColumn(null); // not supported by query; fallback:
+                pos = 1000.0;
+            }
+        }
+
+        t.setColumn(newCol);
+        t.setPositionIndex(pos);
+        TaskEntity saved = taskRepository.save(t);
+
+        //write activity log
+
+        ActivityLogEntity log = new ActivityLogEntity(saved, "task.moved", actorAuth0Id
+            , String.format("{\"toColumn\":\"%s\",\"position\":%s}", newCol != null ? newCol.getId() : "null" , pos));
+
+        activityLogRepository.save(log);
+
+        //broadcast
+        if(saved.getProject() != null && saved.getProject().getId() != null){
+            String topic = "/topic/project." + saved.getProject().getId().toString();
+            var payload = new java.util.HashMap<String, Object>();
+            payload.put("type", "task.moved");
+            payload.put("taskId", saved.getId());
+            payload.put("toColumnId", newCol != null ? newCol.getId() : null);
+            payload.put("position", pos);
+            payload.put("task", TaskMapper.toDto(saved));
+            payload.put("actor", actorAuth0Id);
+            simpMessagingTemplate.convertAndSend(topic, payload);
+        }
+
         return TaskMapper.toDto(saved);
     }
 

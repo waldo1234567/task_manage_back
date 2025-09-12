@@ -33,11 +33,18 @@ public class TaskEntity {
     private String assigneeAuth0Id;
 
     @Column(name = "due_date")
-    private Instant dueDate; // or LocalDate if you prefer
-
+    private Instant dueDate;
     @Column(nullable = false)
     private int priority = 3;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "column_id")
+    private BoardColumnEntity column;
+
+    @Column(name = "position_index")
+    private Double positionIndex;
+    @Version
+    private Long version;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
@@ -45,6 +52,8 @@ public class TaskEntity {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+
 
     // Constructors
     public TaskEntity() {}
@@ -79,4 +88,10 @@ public class TaskEntity {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 
+    public BoardColumnEntity getColumn() { return column; }
+    public void setColumn(BoardColumnEntity column) { this.column = column; }
+    public Double getPositionIndex() { return positionIndex; }
+    public void setPositionIndex(Double positionIndex) { this.positionIndex = positionIndex; }
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

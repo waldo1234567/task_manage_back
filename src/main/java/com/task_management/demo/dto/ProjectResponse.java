@@ -7,13 +7,13 @@ public class ProjectResponse {
     private UUID id;
     private String name;
     private String description;
-
     private Instant created_at;
+    private String createdByAuth0Id;
 
     public ProjectResponse(){}
 
-    public ProjectResponse(UUID id, String name, String description, Instant created_at){
-        this.id = id; this.name = name; this.description = description; this.created_at = created_at;
+    public ProjectResponse(UUID id, String name, String description, Instant created_at, String createdByAuth0Id){
+        this.id = id; this.name = name; this.description = description; this.created_at = created_at; this.createdByAuth0Id=createdByAuth0Id;
     }
 
     public UUID getId() { return id; }
@@ -24,4 +24,7 @@ public class ProjectResponse {
     public void setDescription(String description) { this.description = description; }
     public Instant getCreatedAt() { return created_at; }
     public void setCreatedAt(Instant created_at) { this.created_at = created_at; }
+    public String getCreatedByAuth0Id() { return createdByAuth0Id; }
+    public void setCreatedByAuth0Id(String createdByAuth0Id) { this.createdByAuth0Id = createdByAuth0Id; }
 }
+
